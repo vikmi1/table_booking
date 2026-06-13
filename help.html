@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Руководство · Система бронирования столиков</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --espresso:#16100c;
+    --espresso-2:#1e1610;
+    --surface:#241a13;
+    --surface-2:#2c2018;
+    --line:#3d2e22;
+    --cream:#f1e7d8;
+    --cream-dim:#cdbca5;
+    --muted:#9c8a72;
+    --gold:#cda35a;
+    --gold-bright:#e7c47e;
+    --gold-deep:#a07a36;
+    --wine:#9d4a3b;
+    --free:#6cbf7e;
+    --busy:#df6b5f;
+    --shadow:0 24px 60px -20px rgba(0,0,0,.7);
+    --serif:'Cormorant Garamond', Georgia, serif;
+    --sans:'Golos Text', system-ui, sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html{scroll-behavior:smooth}
+
+  body{
+    font-family:var(--sans);
+    background:var(--espresso);
+    color:var(--cream);
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* Тёплое свечение свечи за шапкой */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(60% 40% at 50% -5%, rgba(205,163,90,.18), transparent 70%),
+      radial-gradient(40% 30% at 85% 12%, rgba(157,74,59,.12), transparent 70%),
+      radial-gradient(50% 40% at 10% 30%, rgba(205,163,90,.08), transparent 70%);
+    pointer-events:none;
+    z-index:0;
+    animation:flicker 7s ease-in-out infinite;
+  }
+
+  /* Зернистость */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+    opacity:.05;
+    mix-blend-mode:overlay;
+    pointer-events:none;
+    z-index:1;
+  }
+
+  @keyframes flicker{
+    0%,100%{opacity:1}
+    45%{opacity:.85}
+    60%{opacity:.95}
+    75%{opacity:.8}
+  }
+
+  .wrap{
+    position:relative;
+    z-index:2;
+    max-width:920px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  /* ---------- Шапка ---------- */
+  header{
+    text-align:center;
+    padding:120px 0 70px;
+    position:relative;
+  }
+
+  .eyebrow{
+    font-family:var(--sans);
+    font-size:.72rem;
+    letter-spacing:.42em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+    margin-bottom:30px;
+    opacity:0;
+    animation:rise .9s .1s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(3rem,8vw,5.6rem);
+    line-height:1.02;
+    letter-spacing:-.01em;
+    margin-bottom:8px;
+    background:linear-gradient(100deg,var(--cream) 20%,var(--gold-bright) 50%,var(--cream) 80%);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:rise 1s .2s cubic-bezier(.2,.7,.2,1) backwards, shimmer 6s linear infinite 1.2s;
+  }
+
+  h1 .em{font-style:italic;font-weight:500}
+
+  .tagline{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(1.2rem,2.6vw,1.7rem);
+    color:var(--cream-dim);
+    margin-top:18px;
+    opacity:0;
+    animation:rise .9s .45s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  @keyframes shimmer{to{background-position:200% center}}
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Декоративный разделитель */
+  .divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin:46px auto 0;
+    max-width:340px;
+    opacity:0;
+    animation:rise .9s .6s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .divider .rule{height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--gold-deep))}
+  .divider .rule:last-child{background:linear-gradient(90deg,var(--gold-deep),transparent)}
+  .divider svg{width:26px;height:26px;color:var(--gold);flex:none}
+
+  /* ---------- Вводный абзац ---------- */
+  .lede{
+    font-family:var(--serif);
+    font-size:clamp(1.35rem,2.6vw,1.65rem);
+    line-height:1.6;
+    color:var(--cream-dim);
+    text-align:center;
+    max-width:720px;
+    margin:0 auto 30px;
+  }
+  .lede .drop{
+    float:left;
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:4.4rem;
+    line-height:.74;
+    padding:8px 14px 0 0;
+    color:var(--gold);
+  }
+
+  /* ---------- Секции ---------- */
+  section{padding:56px 0}
+
+  .sec-head{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    margin-bottom:36px;
+  }
+  .sec-num{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:1.25rem;
+    color:var(--gold);
+    flex:none;
+  }
+  .sec-head h2{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(2rem,4.5vw,2.9rem);
+    letter-spacing:-.01em;
+    color:var(--cream);
+    white-space:nowrap;
+  }
+  .sec-head .rule{height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent);align-self:center}
+
+  /* Меню возможностей */
+  .menu-item{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:baseline;
+    gap:6px;
+    padding:22px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .menu-item:last-child{border-bottom:none}
+  .mi-title{
+    font-family:var(--serif);
+    font-size:1.7rem;
+    font-weight:600;
+    color:var(--cream);
+  }
+  .mi-lead{
+    border-bottom:1.5px dotted var(--line);
+    transform:translateY(-5px);
+    min-width:24px;
+  }
+  .mi-tag{
+    font-size:.7rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .mi-desc{
+    grid-column:1 / -1;
+    color:var(--cream-dim);
+    font-size:1.02rem;
+    margin-top:8px;
+    max-width:64ch;
+  }
+
+  /* ---------- Карта зала: легенда ---------- */
+  .floor-card{
+    background:linear-gradient(165deg,var(--surface),var(--espresso-2));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:38px;
+    box-shadow:var(--shadow);
+  }
+  .floor{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+    gap:18px;
+    margin-bottom:30px;
+  }
+  .tbl{
+    aspect-ratio:1.15/1;
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#10100c;
+    text-align:center;
+    position:relative;
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25), 0 10px 24px -12px rgba(0,0,0,.6);
+    transition:transform .35s cubic-bezier(.2,.7,.2,1);
+  }
+  .tbl:hover{transform:translateY(-5px) rotate(-1deg)}
+  .tbl.free{background:linear-gradient(160deg,#86d199,var(--free))}
+  .tbl.busy{background:linear-gradient(160deg,#ea8478,var(--busy))}
+  .tbl.off{background:linear-gradient(160deg,#b6aa97,#8f8068);color:#2a231a}
+  .tbl b{font-family:var(--serif);font-size:2.4rem;font-weight:700;line-height:1}
+  .tbl small{font-size:.72rem;font-weight:600;margin-top:6px;opacity:.85;padding:0 8px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:24px;justify-content:center}
+  .legend span{display:inline-flex;align-items:center;gap:9px;font-size:.92rem;color:var(--cream-dim)}
+  .dot{width:14px;height:14px;border-radius:4px;flex:none}
+  .dot.free{background:var(--free)}
+  .dot.busy{background:var(--busy)}
+  .dot.off{background:#9f9079}
+
+  /* ---------- Шаги ---------- */
+  .steps{display:flex;flex-direction:column;gap:4px}
+  .step{
+    display:grid;
+    grid-template-columns:64px 1fr;
+    gap:24px;
+    padding:24px 0;
+    border-bottom:1px solid var(--line);
+    align-items:start;
+  }
+  .step:last-child{border-bottom:none}
+  .step .rn{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:2.2rem;
+    color:var(--gold);
+    line-height:1;
+  }
+  .step h3{
+    font-family:var(--serif);
+    font-size:1.5rem;
+    font-weight:600;
+    margin-bottom:6px;
+    color:var(--cream);
+  }
+  .step p{color:var(--cream-dim);font-size:1rem}
+  .step code{
+    font-family:'Golos Text',monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--gold-bright);
+    padding:1px 8px;
+    border-radius:6px;
+    font-size:.85em;
+  }
+
+  /* ---------- Правила (callout) ---------- */
+  .rules{
+    background:
+      linear-gradient(165deg,var(--surface),var(--espresso-2));
+    border:1px solid var(--line);
+    border-left:3px solid var(--gold);
+    border-radius:14px;
+    padding:34px 38px;
+  }
+  .rules ul{list-style:none;display:flex;flex-direction:column;gap:18px}
+  .rules li{display:flex;gap:16px;align-items:flex-start;color:var(--cream-dim);font-size:1.05rem}
+  .rules li .mk{color:var(--gold);font-family:var(--serif);font-size:1.4rem;line-height:1;flex:none;transform:translateY(2px)}
+  .rules b{color:var(--cream);font-weight:600}
+  .timebar{
+    display:flex;align-items:center;gap:2px;margin-top:26px;
+    font-size:.74rem;color:var(--muted);letter-spacing:.05em;
+  }
+  .slot{
+    flex:1;text-align:center;padding:10px 4px;border-radius:8px;font-weight:600;
+    border:1px solid var(--line);
+  }
+  .slot.a{background:rgba(108,191,126,.14);color:var(--free);border-color:rgba(108,191,126,.35)}
+  .slot.b{background:rgba(223,107,95,.14);color:var(--busy);border-color:rgba(223,107,95,.35)}
+
+  /* ---------- Технологии ---------- */
+  .tech{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+  .chip{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+    transition:border-color .3s, transform .3s;
+  }
+  .chip:hover{border-color:var(--gold-deep);transform:translateY(-3px)}
+  .chip .k{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .chip .v{font-family:var(--serif);font-size:1.45rem;color:var(--cream);margin-top:6px}
+
+  /* ---------- Подвал ---------- */
+  footer{
+    text-align:center;
+    padding:80px 0 70px;
+    margin-top:30px;
+    border-top:1px solid var(--line);
+  }
+  footer .sig{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:2rem;
+    color:var(--gold-bright);
+  }
+  footer .small{color:var(--muted);font-size:.85rem;margin-top:14px;letter-spacing:.04em}
+
+  /* Анимация появления при прокрутке */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  @media (max-width:560px){
+    .wrap{padding:0 22px}
+    header{padding:90px 0 50px}
+    .menu-item{grid-template-columns:1fr;gap:2px}
+    .mi-lead,.mi-tag{display:none}
+    .step{grid-template-columns:44px 1fr;gap:16px}
+    .floor-card,.rules{padding:26px 22px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ШАПКА -->
+  <header>
+    <div class="eyebrow">Руководство пользователя</div>
+    <h1>Бронирование<br><span class="em">столиков</span></h1>
+    <p class="tagline">Управляйте залом, гостями и бронями — за одним столом</p>
+    <div class="divider">
+      <span class="rule"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 2v6a2 2 0 0 0 2 2v12M7 2v6M9 2v6M9 2v8"/>
+        <path d="M17 2c-1.5 0-2.5 2-2.5 5s1 4 2.5 4v11"/>
+      </svg>
+      <span class="rule"></span>
+    </div>
+  </header>
+
+  <!-- ВВЕДЕНИЕ -->
+  <p class="lede reveal"><span class="drop">Э</span>то настольное приложение для ресторана: оно показывает план зала, ведёт справочник гостей и не даёт двум компаниям занять один и тот же столик на одно время. Всё хранится в базе данных PostgreSQL, а работа идёт через простое окно — без сайтов и браузеров.</p>
+
+  <!-- ВОЗМОЖНОСТИ -->
+  <section>
+    <div class="sec-head reveal">
+      <span class="sec-num">I</span>
+      <h2>Возможности</h2>
+      <span class="rule"></span>
+    </div>
+
+    <div class="menu-item reveal">
+      <span class="mi-title">Карта зала</span>
+      <span class="mi-lead"></span>
+      <span class="mi-tag">обзор</span>
+      <p class="mi-desc">Столы показаны прямоугольниками с номером и подписью: сколько мест и где расположен. Зелёный — свободен, красный — занят. Для занятого видно, до какого времени. Клик по столу сразу открывает бронирование.</p>
+    </div>
+
+    <div class="menu-item reveal">
+      <span class="mi-title">Клиенты</span>
+      <span class="mi-lead"></span>
+      <span class="mi-tag">справочник</span>
+      <p class="mi-desc">Список гостей с именем, email и телефоном. Можно добавлять, изменять и удалять. На клиента оформляются брони — авторизации и паролей нет, это просто адресная книга зала.</p>
+    </div>
+
+    <div class="menu-item reveal">
+      <span class="mi-title">Столы</span>
+      <span class="mi-lead"></span>
+      <span class="mi-tag">настройка зала</span>
+      <p class="mi-desc">Задайте количество столов (до десяти) одним движением и опишите каждый: вместимость, расположение — у окна, в центре, на террасе — и активность.</p>
+    </div>
+
+    <div class="menu-item reveal">
+      <span class="mi-title">Бронирования</span>
+      <span class="mi-lead"></span>
+      <span class="mi-tag">журнал</span>
+      <p class="mi-desc">Полный список броней в понятном виде: гость, стол, начало и конец, комментарий. Создание, изменение и удаление — в пару кликов.</p>
+    </div>
+
+    <div class="menu-item reveal">
+      <span class="mi-title">Проверка доступности</span>
+      <span class="mi-lead"></span>
+      <span class="mi-tag">за секунду</span>
+      <p class="mi-desc">Выберите стол и интервал — приложение скажет, свободен он или занят, и подскажет, какие брони мешают.</p>
+    </div>
+
+    <div class="menu-item reveal">
+      <span class="mi-title">Тестовые данные</span>
+      <span class="mi-lead"></span>
+      <span class="mi-tag">для демонстрации</span>
+      <p class="mi-desc">Одна кнопка создаёт трёх гостей и две брони — чтобы сразу увидеть, как всё работает, не заполняя вручную.</p>
+    </div>
+  </section>
+
+  <!-- КАРТА ЗАЛА -->
+  <section>
+    <div class="sec-head reveal">
+      <span class="sec-num">II</span>
+      <h2>Как читать зал</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="floor-card reveal">
+      <div class="floor">
+        <div class="tbl free"><b>1</b><small>4 места · у окна</small></div>
+        <div class="tbl busy"><b>2</b><small>занято до 20:00</small></div>
+        <div class="tbl free"><b>3</b><small>2 места · в центре</small></div>
+        <div class="tbl free"><b>4</b><small>6 мест · на террасе</small></div>
+        <div class="tbl busy"><b>5</b><small>занято до 21:30</small></div>
+        <div class="tbl off"><b>6</b><small>неактивен</small></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot free"></i> Свободен — можно бронировать</span>
+        <span><i class="dot busy"></i> Занят — указано, до какого времени</span>
+        <span><i class="dot off"></i> Неактивен — выключен из зала</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- КАК НАЧАТЬ -->
+  <section>
+    <div class="sec-head reveal">
+      <span class="sec-num">III</span>
+      <h2>С чего начать</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <span class="rn">i</span>
+        <div>
+          <h3>Запустите приложение</h3>
+          <p>На Windows — двойной клик по <code>start.cmd</code>, на macOS — по <code>start.command</code>. При первом запуске в окне терминала появится короткая настройка: имя базы данных и пароль PostgreSQL.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="rn">ii</span>
+        <div>
+          <h3>Создайте зал</h3>
+          <p>Укажите, сколько столов в зале (до десяти). На вкладке «Столы и настройки» можно уточнить вместимость и расположение каждого.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="rn">iii</span>
+        <div>
+          <h3>Добавьте гостей</h3>
+          <p>На вкладке «Клиенты» заведите тех, кто бронирует. Или нажмите «Создать тестовые данные» и пропустите этот шаг.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="rn">iv</span>
+        <div>
+          <h3>Бронируйте</h3>
+          <p>Кликните по свободному столу на карте или откройте «Бронирования». Выберите гостя, дату и время — приложение само проверит, что стол свободен.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="rn">v</span>
+        <div>
+          <h3>Управляйте</h3>
+          <p>Меняйте время и гостя, отменяйте брони, проверяйте доступность на нужный интервал. Карта зала перекрашивается под выбранный момент.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПРАВИЛА -->
+  <section>
+    <div class="sec-head reveal">
+      <span class="sec-num">IV</span>
+      <h2>Правила бронирования</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="rules reveal">
+      <ul>
+        <li><span class="mk">◆</span><span><b>Никаких накладок.</b> Нельзя создать бронь, которая пересекается с уже существующей на тот же стол. Приложение покажет, какое время мешает.</span></li>
+        <li><span class="mk">◆</span><span><b>Впритык — можно.</b> Если одна бронь заканчивается ровно в момент начала другой, это разрешено. Стол освободился в 20:00 — следующий гость садится в 20:00.</span></li>
+        <li><span class="mk">◆</span><span><b>Время осмысленно.</b> Окончание всегда позже начала — иначе бронь не сохранится.</span></li>
+      </ul>
+      <div class="timebar">
+        <div class="slot a">18:00&nbsp;—&nbsp;20:00&nbsp;✓</div>
+        <div class="slot b" style="flex:.7">19:00&nbsp;—&nbsp;21:00&nbsp;✕</div>
+        <div class="slot a">20:00&nbsp;—&nbsp;22:00&nbsp;✓</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ТЕХНОЛОГИИ -->
+  <section>
+    <div class="sec-head reveal">
+      <span class="sec-num">V</span>
+      <h2>Под капотом</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="tech">
+      <div class="chip reveal"><div class="k">Язык</div><div class="v">Python</div></div>
+      <div class="chip reveal"><div class="k">База данных</div><div class="v">PostgreSQL</div></div>
+      <div class="chip reveal"><div class="k">Интерфейс</div><div class="v">Tkinter</div></div>
+      <div class="chip reveal"><div class="k">Запуск</div><div class="v">Один файл</div></div>
+    </div>
+  </section>
+
+  <!-- ПОДВАЛ -->
+  <footer class="reveal">
+    <div class="sig">Bon appétit</div>
+    <div class="small">Система бронирования столиков · руководство пользователя</div>
+  </footer>
+
+</div>
+
+<script>
+  // Плавное появление блоков при прокрутке
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        e.target.style.transitionDelay = Math.min(i*60, 240) + 'ms';
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.14, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
