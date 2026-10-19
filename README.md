@@ -1,182 +1,186 @@
-# Система бронирования столиков
+**English** · [Deutsch](README.de.md) · [Русский](README.ru.md)
 
-Настольное приложение (Python + PostgreSQL) для управления бронированием столиков
-в ресторане. Интерфейс — на Tkinter: карта зала с цветными столами, списки
-клиентов, столов и броней, проверка доступности и контроль пересечений.
+# Restaurant Table Booking System
 
-## Скриншоты
+A desktop application (Python + PostgreSQL) for managing table reservations
+in a restaurant. The interface is built with Tkinter: a floor map with color-coded
+tables, lists of customers, tables and reservations, availability checks and
+overlap control.
 
-**Карта зала** — занятые на выбранное время столы красные, с временем окончания брони:
+The interface of the app is in Russian; UI labels below are given in Russian with an English translation.
 
-![Карта зала](screenshots/booking_map.png)
+## Screenshots
 
-**Список бронирований:**
+**Floor map** — tables that are occupied at the selected time are red and show when the reservation ends:
 
-![Список бронирований](screenshots/booking_bookings.png)
+![Floor map](screenshots/booking_map.png)
 
-## 🚀 Быстрый запуск
+**List of reservations:**
 
-**Что нужно заранее:** установленный Python 3.9+ и запущенный сервер
-PostgreSQL (pgAdmin открывать не нужно).
+![List of reservations](screenshots/booking_bookings.png)
+
+## 🚀 Quick start
+
+**Prerequisites:** Python 3.9+ installed and a running PostgreSQL
+server (you do not need to open pgAdmin).
 
 ### Windows
 
-1. Скачайте/распакуйте проект и откройте его папку.
-2. Двойной клик по **`start.cmd`** (или в терминале):
+1. Download/unpack the project and open its folder.
+2. Double-click **`start.cmd`** (or run it in a terminal):
    ```
    start.cmd
    ```
 
 ### macOS
 
-1. Скачайте/распакуйте проект, откройте его папку в Терминале.
-2. Один раз сделайте файл исполняемым и запустите:
+1. Download/unpack the project and open its folder in Terminal.
+2. Make the file executable once and run it:
    ```
    chmod +x start.command
    ./start.command
    ```
 
-Скрипт сам установит зависимости и запустит приложение. **При первом запуске**
-в терминале появится короткий мастер: выберите «создать новую базу», введите имя
-базы (например `booking_db`) и пароль пользователя `postgres` — и откроется окно
-приложения. Подробности — в разделах [«Запуск»](#запуск) и
-[«Первый запуск: настройка БД»](#первый-запуск-настройка-бд) ниже.
+The script installs the dependencies and starts the app. **On the first run**
+a short wizard appears in the terminal: choose "create a new database", enter a
+database name (e.g. `booking_db`) and the password of the `postgres` user — and
+the app window opens. Details are in the [Running](#running) and
+[First run: database setup](#first-run-database-setup) sections below.
 
-> Запустить можно и вручную: `pip install -r requirements.txt`, затем
+> You can also start it manually: `pip install -r requirements.txt`, then
 > `python app.py`.
 
 ---
 
-## Возможности
+## Features
 
-- **Карта зала** — столы как прямоугольники с номером и подписью (мест,
-  расположение). Зелёный — свободен, красный — занят. Для занятого видно, до
-  какого времени. Клик по столу открывает форму брони.
-- **Клиенты** — справочник гостей (имя, email, телефон). Полный CRUD.
-- **Столы** — номер, вместимость, расположение, активность. Полный CRUD,
-  быстрая установка количества столов (1–10).
-- **Бронирования** — полный CRUD, читаемый список всех броней.
-- **Проверка доступности** столика на выбранный интервал.
-- **Контроль пересечений** — нельзя создать бронь, пересекающуюся с уже
-  существующей на тот же стол. Соседние брони впритык (одна кончается ровно
-  когда начинается другая) разрешены.
-- **Тестовые данные** — кнопка создаёт 3 клиентов и 2 брони для демонстрации.
+- **Floor map** — tables are drawn as rectangles with a number and a caption
+  (seats, location). Green means free, red means occupied. For an occupied table
+  you can see until when. Clicking a table opens the reservation form.
+- **Customers** — a guest directory (name, email, phone). Full CRUD.
+- **Tables** — number, capacity, location, active flag. Full CRUD,
+  quick setting of the number of tables (1–10).
+- **Reservations** — full CRUD and a readable list of all reservations.
+- **Availability check** for a table over a selected time interval.
+- **Overlap control** — you cannot create a reservation that overlaps an
+  existing one for the same table. Back-to-back reservations (one ends exactly
+  when the next one starts) are allowed.
+- **Sample data** — a button creates 3 customers and 2 reservations for a demo.
 
-## Структура проекта
+## Project structure
 
 ```
-postgres_driver.py   — подключение к БД, выполнение SQL, создание БД и таблиц
-backend.py           — бизнес-логика и CRUD, проверка доступности/пересечений
-config.py            — чтение .env и консольный мастер первичной настройки
+postgres_driver.py   — database connection, SQL execution, creating the database and tables
+backend.py           — business logic and CRUD, availability/overlap checks
+config.py            — reading .env and the console first-run setup wizard
 models/
-  user.py            — модель User (клиент)
-  table.py           — модель Table (столик)
-  booking.py         — модель Booking (бронь)
-app.py               — интерфейс Tkinter и точка входа
+  user.py            — User model (customer)
+  table.py           — Table model
+  booking.py         — Booking model (reservation)
+app.py               — Tkinter interface and entry point
 requirements.txt
 .env.example
-start.cmd            — запуск на Windows
-start.command        — запуск на macOS
+start.cmd            — start on Windows
+start.command        — start on macOS
 ```
 
-Таблицы в БД: `customers`, `restaurant_tables`, `bookings`.
+Database tables: `customers`, `restaurant_tables`, `bookings`.
 
-## Требования
+## Requirements
 
-- Python 3.9+ (Tkinter входит в стандартную поставку Python).
-- Установленный и **запущенный сервер PostgreSQL**.
+- Python 3.9+ (Tkinter ships with the standard Python distribution).
+- An installed and **running PostgreSQL server**.
 
-> **Нужен ли pgAdmin?** Нет. pgAdmin — это лишь графический клиент для
-> просмотра базы. Приложение подключается к серверу PostgreSQL напрямую.
-> Достаточно, чтобы была запущена служба сервера (`postgresql-x64-…`) — обычно
-> она стартует автоматически вместе с системой. pgAdmin открывать не нужно.
+> **Do I need pgAdmin?** No. pgAdmin is just a graphical client for browsing
+> the database. The app connects to the PostgreSQL server directly.
+> It is enough that the server service (`postgresql-x64-…`) is running — usually
+> it starts automatically with the system. You do not need to open pgAdmin.
 
-## Запуск
+## Running
 
 ### Windows
-Двойной клик по **`start.cmd`** (или в терминале):
+Double-click **`start.cmd`** (or run it in a terminal):
 
 ```
 start.cmd
 ```
 
 ### macOS
-Один раз сделайте файл исполняемым, затем запускайте двойным кликом:
+Make the file executable once, then start it with a double-click:
 
 ```
 chmod +x start.command
 ./start.command
 ```
 
-Скрипт сам установит зависимости из `requirements.txt` и запустит `app.py`.
-Можно запускать и напрямую:
+The script installs the dependencies from `requirements.txt` and starts `app.py`.
+You can also run it directly:
 
 ```
 pip install -r requirements.txt
 python app.py
 ```
 
-## Первый запуск: настройка БД
+## First run: database setup
 
-При первом запуске (если файла `.env` ещё нет) в **терминале** появится мастер.
-Чтобы не путать неподготовленного пользователя, он спрашивает только самое
-необходимое:
+On the first run (if there is no `.env` file yet) a wizard appears in the **terminal**.
+To keep things simple for non-technical users, it asks only for the essentials:
 
-1. Выбор: **создать новую базу** или **подключиться к существующей**.
-2. **Имя базы данных** (например `booking_db`).
-3. **Пароль пользователя postgres** — тот, что задавался при установке
+1. Choose: **create a new database** or **connect to an existing one**.
+2. **Database name** (e.g. `booking_db`).
+3. **Password of the postgres user** — the one set when installing
    PostgreSQL.
 
-Хост (`localhost`), порт (`5432`) и пользователь (`postgres`) берутся
-стандартными — вводить их не нужно. Если подключение не удастся (например,
-PostgreSQL установлен на нестандартный порт), мастер сам предложит ввести эти
-параметры вручную.
+Host (`localhost`), port (`5432`) and user (`postgres`) use the standard
+values — you do not need to enter them. If the connection fails (for example,
+PostgreSQL runs on a non-standard port), the wizard offers to enter these
+parameters manually.
 
-Далее:
+Then:
 
-4. Если выбрано «создать» — приложение подключится к служебной базе `postgres`
-   и выполнит `CREATE DATABASE`.
-5. Параметры сохранятся в `.env`.
-6. Будет задан вопрос: **сколько столов создать (1–10)**.
-7. Откроется окно приложения.
+4. If "create" was chosen, the app connects to the system database `postgres`
+   and runs `CREATE DATABASE`.
+5. The parameters are saved to `.env`.
+6. You are asked **how many tables to create (1–10)**.
+7. The app window opens.
 
-> **Про порт.** Стандартный порт PostgreSQL — `5432`, он одинаковый на всех
-> компьютерах при обычной установке. Другой порт встречается редко: если
-> установлено несколько версий PostgreSQL или порт меняли вручную.
+> **About the port.** The standard PostgreSQL port is `5432`; it is the same on
+> all computers with a regular installation. A different port is rare: it happens
+> when several PostgreSQL versions are installed or the port was changed manually.
 
-При последующих запусках `.env` уже есть — мастер не появляется, сразу
-открывается окно.
+On subsequent runs `.env` already exists — the wizard does not appear and the
+window opens right away.
 
-> Чтобы пройти настройку заново (например, создать отдельную базу), удалите файл
-> `.env` и запустите приложение снова.
+> To run the setup again (for example, to create a separate database), delete
+> the `.env` file and start the app again.
 
-## Файл .env
+## The .env file
 
 ```
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=booking_db
 DB_USER=postgres
-DB_PASSWORD=ваш_пароль
+DB_PASSWORD=your_password
 ```
 
-Образец — в `.env.example`. Файл `.env` в репозиторий не коммитится.
+A template is in `.env.example`. The `.env` file is not committed to the repository.
 
-## Как пользоваться
+## How to use
 
-1. На вкладке **«Столы и настройки»** задайте количество столов и при желании
-   измените каждый стол (мест, расположение). Можно нажать **«Создать тестовые
-   данные»**.
-2. На вкладке **«Клиенты»** добавьте гостей.
-3. На вкладке **«Бронирования»** или прямо с **карты зала** (клик по столу)
-   создайте бронь: выберите клиента, стол, дату и время.
-4. Кнопка **«Проверить доступность»** показывает, свободен ли стол на интервал.
-5. На карте зала выберите дату и время и нажмите **«Показать занятость»** —
-   столы перекрасятся в зелёный/красный.
+1. On the **"Столы и настройки" (Tables & settings)** tab set the number of tables
+   and, if you like, edit each table (seats, location). You can click
+   **"Создать тестовые данные" (Create sample data)**.
+2. On the **"Клиенты" (Customers)** tab add guests.
+3. On the **"Бронирования" (Reservations)** tab or directly on the **floor map**
+   (click a table) create a reservation: choose a customer, a table, a date and a time.
+4. The **"Проверить доступность" (Check availability)** button shows whether a table is free for an interval.
+5. On the floor map choose a date and a time and click **"Показать занятость" (Show occupancy)** —
+   the tables turn green/red.
 
-## Логика пересечений
+## Overlap logic
 
-Бронь A `[a_start, a_end)` и бронь B `[b_start, b_end)` на один стол
-пересекаются, если `a_start < b_end` **и** `a_end > b_start`. Неравенства
-строгие, поэтому брони впритык (например 18:00–20:00 и 20:00–22:00) считаются
-допустимыми. Также проверяется, что время окончания позже времени начала.
+Reservation A `[a_start, a_end)` and reservation B `[b_start, b_end)` for the same
+table overlap if `a_start < b_end` **and** `a_end > b_start`. The inequalities are
+strict, so back-to-back reservations (e.g. 18:00–20:00 and 20:00–22:00) are
+allowed. The app also checks that the end time is later than the start time.
